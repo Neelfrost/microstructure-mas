@@ -1,4 +1,4 @@
-class Iter:
+class Simulate:
     def __init__(self, grid):
         self.grid = grid
         self.grain_boundary_energy = 1
