@@ -1,6 +1,9 @@
+import argparse
 import os
 from random import randint
 import sys
+
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
 import pygame as pg
 
@@ -30,35 +33,106 @@ def draw_char(canvas, font, color, text, x, y):
 
 
 # Get shade of gray
-def get_shade(value, index):
-    offset = 100
-    shade = (255 - offset) / value
-    return (offset + shade * index, offset + shade * index, offset + shade * index)
+def get_shade(total_orientations, orientation):
+    offset = 50
+    shade = (255 - offset) / total_orientations
+    return (
+        offset + shade * orientation,
+        offset + shade * orientation,
+        offset + shade * orientation,
+    )
+
+
+# Setup cli
+def parser():  # {{{
+    # Init parser
+    parser = argparse.ArgumentParser(
+        description="Generate microstructures and simulator their grain growth."
+    )
+
+    # Add args
+    parser.add_argument(
+        "-w",
+        dest="WIDTH",
+        default=500,
+        type=int,
+        help="Window size. (default: 500)",
+    )
+    parser.add_argument(
+        "-c",
+        dest="CELL_SIZE",
+        default=5,
+        type=int,
+        help="Cell size. Lower = more anti-aliased. (default: 5, recommended: 1-10)",
+    )
+    parser.add_argument(
+        "-o",
+        dest="ORIENTATIONS",
+        default=100,
+        type=int,
+        help="Inital grain size. Higher = Smaller grains. (default: 100)",
+    )
+    parser.add_argument(
+        "-m",
+        dest="METHOD",
+        default="sobol",
+        choices=("pseudo", "sobol", "halton", "latin"),
+        type=str,
+        help="Seed generation algorithm. (default: sobol)",
+    )
+    parser.add_argument(
+        "--simulate",
+        dest="SIMULATE",
+        default=False,
+        type=bool,
+        help="Simulate grain growth?",
+        action=argparse.BooleanOptionalAction,
+    )
+
+    # Return args namespace
+    return parser.parse_args()  # }}}
 
 
 def main():
+    # Process arguments
+    args = parser()
+
+    # Window size
+    WIDTH = HEIGHT = args.WIDTH
+
+    # Size of a cell (i.e., resolution), lower = more anti-aliased
+    GRID_CELL_SIZE = min(WIDTH, max(args.CELL_SIZE, 1))
+
+    # Number of cols, rows
+    SIZE = WIDTH // GRID_CELL_SIZE
+
+    # Seed generation algorithm
+    METHOD = args.METHOD
+
+    # Grain size
+    ORIENTATIONS = args.ORIENTATIONS
+
+    # Bools
+    simulate = args.SIMULATE
+    draw_grid_lines = False
+    draw_grid_seeds = False
+
+    # Init microstructure
+    grid = Matrix2D(SIZE, SIZE, ORIENTATIONS, METHOD)
+
+    # Init simulator
+    simulator = Simulate(grid)
+
+    # Init pygame
     pg.init()
     pg.display.set_caption("Grain Simulation")
+
+    # Set window icon
     icon = pg.image.load(resource_path("icon.png"))
     pg.display.set_icon(icon)
 
+    # Set font
     font = pg.font.SysFont("arial", 8)
-
-    # Window size
-    WIDTH = HEIGHT = 600
-
-    # Size of a cell, larger = smaller cell, max = WIDTH
-    SIZE = 200
-
-    # Grain size
-    ORIENTATIONS = 128
-
-    grid = Matrix2D(SIZE, SIZE, ORIENTATIONS, "sobol")
-    simulator = Simulate(grid)
-
-    grid_cell_size = int(WIDTH / SIZE)
-    draw_grid_lines = False
-    draw_grid_seeds = False
 
     canvas = pg.display.set_mode((WIDTH, HEIGHT))
 
@@ -68,7 +142,7 @@ def main():
         # Clear canvas
         canvas.fill(WHITE)
 
-        # Draw matrix with numbers
+        # Draw matrix with numbers{{{
         # for i in range(grid.cols):
         #     for j in range(grid.rows):
         #         draw_char(
@@ -78,7 +152,7 @@ def main():
         #             grid.grid[i][j],
         #             i * grid_cell_size + grid_cell_size / 2,
         #             j * grid_cell_size + grid_cell_size / 2,
-        #         )
+        #         )}}}
 
         # Draw matrix
         for i in range(grid.cols):
@@ -86,7 +160,12 @@ def main():
                 pg.draw.rect(
                     canvas,
                     get_shade(ORIENTATIONS, grid.grid[i][j]),
-                    (i * grid_cell_size, j * grid_cell_size, grid_cell_size, grid_cell_size),
+                    (
+                        i * GRID_CELL_SIZE,
+                        j * GRID_CELL_SIZE,
+                        GRID_CELL_SIZE,
+                        GRID_CELL_SIZE,
+                    ),
                 )
 
         # Draw grain centers
@@ -95,17 +174,23 @@ def main():
                 pg.draw.rect(
                     canvas,
                     (255, 0, 0),
-                    (seed[0] * grid_cell_size, seed[1] * grid_cell_size, grid_cell_size, grid_cell_size),
+                    (
+                        seed[0] * GRID_CELL_SIZE,
+                        seed[1] * GRID_CELL_SIZE,
+                        GRID_CELL_SIZE,
+                        GRID_CELL_SIZE,
+                    ),
                 )
 
         # Draw gridlines
         if draw_grid_lines:
             for i in range(grid.cols):
-                pg.draw.rect(canvas, BLACK, (0, grid_cell_size * i, WIDTH, 1))
-                pg.draw.rect(canvas, BLACK, (grid_cell_size * i, 0, 1, HEIGHT))
+                pg.draw.rect(canvas, BLACK, (0, GRID_CELL_SIZE * i, WIDTH, 1))
+                pg.draw.rect(canvas, BLACK, (GRID_CELL_SIZE * i, 0, 1, HEIGHT))
 
         # Simulate
-        simulator.reorient((randint(0, grid.cols - 2), randint(0, grid.rows - 2)))
+        if simulate:
+            simulator.reorient((randint(0, grid.cols - 2), randint(0, grid.rows - 2)))
 
         # Handle pygame events
         for event in pg.event.get():
