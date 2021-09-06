@@ -47,7 +47,7 @@ def get_shade(total_orientations, orientation):
 def parser():  # {{{
     # Init parser
     parser = argparse.ArgumentParser(
-        description="Generate microstructures and simulator their grain growth."
+        description="Generate microstructures and simulate their grain growth."
     )
 
     # Add args
