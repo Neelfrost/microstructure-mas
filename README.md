@@ -1,5 +1,19 @@
 ## Usage
 
+Clone repo:
+
+```powershell
+git clone https://github.com/Neelfrost/grain-py.git grain_py; cd .\grain_py\
+```
+
+Install dependencies:
+
+```powershell
+pip install -I -r requirements.txt
+```
+
+Run script:
+
 ```powershell
 py .\main.py -h
 ```
