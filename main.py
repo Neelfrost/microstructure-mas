@@ -3,6 +3,8 @@ import os
 from random import randint
 import sys
 
+from alive_progress import alive_bar
+
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
 import pygame as pg
@@ -138,72 +140,77 @@ def main():
 
     clock = pg.time.Clock()
 
-    while True:
-        # Clear canvas
-        canvas.fill(WHITE)
+    with alive_bar(
+        title="Running...", bar=None, monitor=None, stats=None, spinner="radioactive"
+    ):
+        while True:
+            # Clear canvas
+            canvas.fill(WHITE)
 
-        # Draw matrix with numbers{{{
-        # for i in range(grid.cols):
-        #     for j in range(grid.rows):
-        #         draw_char(
-        #             canvas,
-        #             font,
-        #             BLACK,
-        #             grid.grid[i][j],
-        #             i * grid_cell_size + grid_cell_size / 2,
-        #             j * grid_cell_size + grid_cell_size / 2,
-        #         )}}}
+            # Draw matrix with numbers{{{
+            # for i in range(grid.cols):
+            #     for j in range(grid.rows):
+            #         draw_char(
+            #             canvas,
+            #             font,
+            #             BLACK,
+            #             grid.grid[i][j],
+            #             i * grid_cell_size + grid_cell_size / 2,
+            #             j * grid_cell_size + grid_cell_size / 2,
+            #         )}}}
 
-        # Draw matrix
-        for i in range(grid.cols):
-            for j in range(grid.rows):
-                pg.draw.rect(
-                    canvas,
-                    get_shade(ORIENTATIONS, grid.grid[i][j]),
-                    (
-                        i * GRID_CELL_SIZE,
-                        j * GRID_CELL_SIZE,
-                        GRID_CELL_SIZE,
-                        GRID_CELL_SIZE,
-                    ),
-                )
-
-        # Draw grain centers
-        if draw_grid_seeds:
-            for seed in grid.seed_loc:
-                pg.draw.rect(
-                    canvas,
-                    (255, 0, 0),
-                    (
-                        seed[0] * GRID_CELL_SIZE,
-                        seed[1] * GRID_CELL_SIZE,
-                        GRID_CELL_SIZE,
-                        GRID_CELL_SIZE,
-                    ),
-                )
-
-        # Draw gridlines
-        if draw_grid_lines:
+            # Draw matrix
             for i in range(grid.cols):
-                pg.draw.rect(canvas, BLACK, (0, GRID_CELL_SIZE * i, WIDTH, 1))
-                pg.draw.rect(canvas, BLACK, (GRID_CELL_SIZE * i, 0, 1, HEIGHT))
+                for j in range(grid.rows):
+                    pg.draw.rect(
+                        canvas,
+                        get_shade(ORIENTATIONS, grid.grid[i][j]),
+                        (
+                            i * GRID_CELL_SIZE,
+                            j * GRID_CELL_SIZE,
+                            GRID_CELL_SIZE,
+                            GRID_CELL_SIZE,
+                        ),
+                    )
 
-        # Simulate
-        if simulate:
-            simulator.reorient((randint(0, grid.cols - 2), randint(0, grid.rows - 2)))
+            # Draw grain centers
+            if draw_grid_seeds:
+                for seed in grid.seed_loc:
+                    pg.draw.rect(
+                        canvas,
+                        (255, 0, 0),
+                        (
+                            seed[0] * GRID_CELL_SIZE,
+                            seed[1] * GRID_CELL_SIZE,
+                            GRID_CELL_SIZE,
+                            GRID_CELL_SIZE,
+                        ),
+                    )
 
-        # Handle pygame events
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                pg.quit()
-                sys.exit()
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_ESCAPE:
+            # Draw gridlines
+            if draw_grid_lines:
+                for i in range(grid.cols):
+                    pg.draw.rect(canvas, BLACK, (0, GRID_CELL_SIZE * i, WIDTH, 1))
+                    pg.draw.rect(canvas, BLACK, (GRID_CELL_SIZE * i, 0, 1, HEIGHT))
+
+            # Simulate
+            if simulate:
+                simulator.reorient(
+                    (randint(0, grid.cols - 2), randint(0, grid.rows - 2))
+                )
+
+            # Handle pygame events
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
                     pg.quit()
                     sys.exit()
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        pg.quit()
+                        sys.exit()
 
-        pg.display.update()
-        clock.tick(1024)
+            pg.display.update()
+            clock.tick(1024)
 
 
 if __name__ == "__main__":
