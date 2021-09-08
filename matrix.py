@@ -1,9 +1,8 @@
 from math import log2
 
+from alive_progress import alive_it
 import numpy as np
 from scipy.stats import qmc
-
-from alive_progress import alive_it
 
 
 class Matrix2D:
@@ -101,14 +100,10 @@ class Matrix2D:
                 if self.grid[i][j] == 0:
                     pre_min_dist = min_dist = self.cols * self.rows
                     for seed in self.seed_loc:
-                        if seed[0] in range(
-                            max(0, i - 150), min(i + 150, self.cols) + 1
-                        ) and seed[1] in range(
-                            max(0, j - 150), min(j + 150, self.rows) + 1
-                        ):
-                            distance_between_seed_cell = self.distance_between_cells(
-                                (i, j), seed
-                            )
+                        distance_between_seed_cell = self.distance_between_cells(
+                            (i, j), seed
+                        )
+                        if distance_between_seed_cell <= 128 ** 2:
                             pre_min_dist = min_dist
                             min_dist = min(pre_min_dist, distance_between_seed_cell)
                             if min_dist < pre_min_dist:
