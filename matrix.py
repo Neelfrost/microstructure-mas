@@ -1,4 +1,6 @@
+import json
 from math import log2
+from time import time
 
 from alive_progress import alive_it
 import numpy as np
@@ -6,27 +8,20 @@ from scipy.stats import qmc
 
 
 class Matrix2D:
-
-    seed_methods = ("pseudo", "sobol", "halton", "latin")
-
+    # Define constructor
     def __init__(self, cols: int, rows: int, orientations: int, seed_method: str):
         self.cols = cols
         self.rows = rows
         self.orientations = orientations
-        self.seed_method = seed_method if seed_method in Matrix2D.seed_methods else None
+        self.seed_method = seed_method
         self.grid = self.make_grid()
         self.create_grains()
 
-    # Returns a 2d array initialized with zeros
+    # Create a 2D array of size cols x rows initialized with zeros
     def make_grid(self) -> list[list[int]]:
-        grid = []
-        for i in range(self.cols):
-            grid.append([])
-            for _ in range(self.rows):
-                grid[i].append(0)
-        return grid
+        return [[0] * self.rows for _ in range(self.cols)]
 
-    # Prints 2d array
+    # Print self.grid
     def __str__(self):
         arr = []
         for col in self.grid:
@@ -35,12 +30,24 @@ class Matrix2D:
             arr.append("\n")
         return "".join(arr)
 
+    def save_grid(self):  # {{{
+        file_name = "grid_" + str(int(time())) + ".json"
+        output_dict = {
+            "cols": self.cols,
+            "rows": self.rows,
+            "orientations": self.orientations,
+            "grid": self.grid,
+        }
+        with open(file_name, "w+") as file:
+            json.dump(output_dict, file)
+        print(f"Microstructure data saved as: {file_name}")  # }}}
+
     # Calculates the distance between 2 cells
     def distance_between_cells(self, start, end):
         return (end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2
 
     # Creates seeds (grain centers)
-    def create_seeds(self):
+    def create_seeds(self):  # {{{
         # List of seed locations, tuple: (x, y)
         self.seed_loc = []
         seeds = np.empty(1)
@@ -84,10 +91,10 @@ class Matrix2D:
                 seed_x = int(seed / self.cols)
                 seed_y = seed % self.rows
                 self.grid[seed_x][seed_y] = seeds_itr.index + 1
-                self.seed_loc.append((seed_x, seed_y))
+                self.seed_loc.append((seed_x, seed_y))  # }}}
 
     # Creates grains with specific orientations
-    def create_zones(self):
+    def create_zones(self):  # {{{
         for i in alive_it(
             range(self.cols),
             title="\033[38;5;102mGenerating microstructure...",
@@ -109,8 +116,19 @@ class Matrix2D:
                             if min_dist < pre_min_dist:
                                 self.grid[i][j] = self.grid[seed[0]][seed[1]]
                         else:
-                            continue
+                            continue  # }}}
 
     def create_grains(self):
         self.create_seeds()
         self.create_zones()
+
+
+class Matrix2DFile(Matrix2D):
+    # Define constructor
+    def __init__(self, file_name):
+        with open(file_name, "r") as file:
+            input_dict = json.load(file)
+        self.cols = input_dict["cols"]
+        self.rows = input_dict["rows"]
+        self.orientations = input_dict["orientations"]
+        self.grid = input_dict["grid"]

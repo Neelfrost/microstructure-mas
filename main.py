@@ -10,6 +10,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 import pygame as pg
 
 from matrix import Matrix2D
+from matrix import Matrix2DFile
 from simulation import Simulate
 
 
@@ -20,18 +21,9 @@ WHITE = (220, 223, 228)
 BLACK = (40, 44, 52)
 
 
-# Fix imports
-# https://stackoverflow.com/questions/40716346/windows-pyinstaller-error-failed-to-execute-script-when-app-clicked
+# Fix file paths
 def resource_path(relative_path):
-    if hasattr(sys, "_MEIPASS"):
-        return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
-
-
-# Draws text 'text' with font 'font' on canvas centered at x,y
-def draw_char(canvas, font, color, text, x, y):
-    text = font.render(str(text), True, color)
-    canvas.blit(text, text.get_rect(center=(x, y)))
 
 
 # Get shade of gray
@@ -90,12 +82,25 @@ def parser():  # {{{
         help="Simulate grain growth?",
         action=argparse.BooleanOptionalAction,
     )
+    parser.add_argument(
+        "--dump",
+        dest="DUMP",
+        default=False,
+        type=bool,
+        help="Output generated microstructure to a file?",
+        action=argparse.BooleanOptionalAction,
+    )
+    parser.add_argument(
+        "--read",
+        dest="READ",
+        help="Read microstructure from a .npy file",
+    )
 
     # Return args namespace
     return parser.parse_args()  # }}}
 
 
-def main():
+def main():  # {{{
     # Process arguments
     args = parser()
 
@@ -116,28 +121,34 @@ def main():
 
     # Bools
     simulate = args.SIMULATE
-    draw_grid_lines = False
-    draw_grid_seeds = False
+
+    # Frame rate
+    FRAMERATE = 12 if not simulate else 1024
 
     # Init microstructure
-    grid = Matrix2D(SIZE, SIZE, ORIENTATIONS, METHOD)
+    if args.READ is None:
+        grid = Matrix2D(SIZE, SIZE, ORIENTATIONS, METHOD)
+    else:
+        grid = Matrix2DFile(args.READ)
+        GRID_CELL_SIZE = WIDTH // grid.cols
+        ORIENTATIONS = grid.orientations
+
+    # Save grid if "--dump"
+    if args.DUMP:
+        grid.save_grid()
 
     # Init simulator
     simulator = Simulate(grid)
 
-    # Init pygame
+    # Setup pygame
     pg.init()
     pg.display.set_caption("Grain Simulation")
-
     # Set window icon
     icon = pg.image.load(resource_path("icon.png"))
     pg.display.set_icon(icon)
-
-    # Set font
-    font = pg.font.SysFont("arial", 8)
-
+    # Create canvas
     canvas = pg.display.set_mode((WIDTH, HEIGHT))
-
+    # Create clock
     clock = pg.time.Clock()
 
     with alive_bar(
@@ -146,18 +157,6 @@ def main():
         while True:
             # Clear canvas
             canvas.fill(WHITE)
-
-            # Draw matrix with numbers{{{
-            # for i in range(grid.cols):
-            #     for j in range(grid.rows):
-            #         draw_char(
-            #             canvas,
-            #             font,
-            #             BLACK,
-            #             grid.grid[i][j],
-            #             i * grid_cell_size + grid_cell_size / 2,
-            #             j * grid_cell_size + grid_cell_size / 2,
-            #         )}}}
 
             # Draw matrix
             for i in range(grid.cols):
@@ -173,26 +172,6 @@ def main():
                         ),
                     )
 
-            # Draw grain centers
-            if draw_grid_seeds:
-                for seed in grid.seed_loc:
-                    pg.draw.rect(
-                        canvas,
-                        (255, 0, 0),
-                        (
-                            seed[0] * GRID_CELL_SIZE,
-                            seed[1] * GRID_CELL_SIZE,
-                            GRID_CELL_SIZE,
-                            GRID_CELL_SIZE,
-                        ),
-                    )
-
-            # Draw gridlines
-            if draw_grid_lines:
-                for i in range(grid.cols):
-                    pg.draw.rect(canvas, BLACK, (0, GRID_CELL_SIZE * i, WIDTH, 1))
-                    pg.draw.rect(canvas, BLACK, (GRID_CELL_SIZE * i, 0, 1, HEIGHT))
-
             # Simulate
             if simulate:
                 simulator.reorient(
@@ -205,12 +184,16 @@ def main():
                     pg.quit()
                     sys.exit()
                 if event.type == pg.KEYDOWN:
+                    # Close window
                     if event.key == pg.K_ESCAPE:
                         pg.quit()
                         sys.exit()
+                    # Save grid
+                    elif event.key == pg.K_s:
+                        grid.save_grid()
 
             pg.display.update()
-            clock.tick(1024)
+            clock.tick(FRAMERATE)  # }}}
 
 
 if __name__ == "__main__":
