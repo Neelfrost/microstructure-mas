@@ -1,9 +1,9 @@
 import argparse
 import os
-from random import randint
 import sys
 
 from alive_progress import alive_bar
+from numpy import random
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
@@ -37,7 +37,7 @@ def get_shade(total_orientations, orientation):
     )
 
 
-# Setup cli
+# ------------------------------------ CLI ----------------------------------- #
 def parser():  # {{{
     # Init parser
     parser = argparse.ArgumentParser(
@@ -83,7 +83,7 @@ def parser():  # {{{
         action=argparse.BooleanOptionalAction,
     )
     parser.add_argument(
-        "--dump",
+        "--save",
         dest="DUMP",
         default=False,
         type=bool,
@@ -91,15 +91,16 @@ def parser():  # {{{
         action=argparse.BooleanOptionalAction,
     )
     parser.add_argument(
-        "--read",
+        "--load",
         dest="READ",
-        help="Read microstructure from a .npy file",
+        help="Load microstructure data from a .json file",
     )
 
     # Return args namespace
     return parser.parse_args()  # }}}
 
 
+# ----------------------------------- Main ----------------------------------- #
 def main():  # {{{
     # Process arguments
     args = parser()
@@ -133,7 +134,7 @@ def main():  # {{{
         GRID_CELL_SIZE = WIDTH // grid.cols
         ORIENTATIONS = grid.orientations
 
-    # Save grid if "--dump"
+    # Save grid if "--save"
     if args.DUMP:
         grid.save_grid()
 
@@ -175,7 +176,10 @@ def main():  # {{{
             # Simulate
             if simulate:
                 simulator.reorient(
-                    (randint(0, grid.cols - 2), randint(0, grid.rows - 2))
+                    (
+                        random.randint(0, grid.cols - 2),
+                        random.randint(0, grid.rows - 2),
+                    )
                 )
 
             # Handle pygame events

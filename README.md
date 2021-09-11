@@ -20,7 +20,7 @@ py .\main.py -h
 
 ```powershell
 usage: main.py [-h] [-w WIDTH] [-c CELL_SIZE] [-o ORIENTATIONS] [-m {pseudo,sobol,halton,latin}]
-               [--simulate | --no-simulate]
+               [--simulate | --no-simulate] [--save | --no-save] [--load READ]
 
 Generate microstructures and simulate their grain growth.
 
@@ -33,17 +33,19 @@ optional arguments:
                         Seed generation algorithm. (default: sobol)
   --simulate, --no-simulate
                         Simulate grain growth? (default: False)
+  --save, --no-save     Output generated microstructure to a file? (default: False)
+  --load READ           Load microstructure data from a .json file
 ```
 
 ## Resulting Grain Structures
 
-|            Pseudo             |            Sobol            |
-| :---------------------------: | :-------------------------: |
-| ![pseudo](.assets/pseudo.png) | ![sobol](.assets/sobol.png) |
+|                                           Pseudo                                           |                                          Sobol                                           |
+| :----------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------: |
+| ![pseudo](https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/pseudo.png) | ![sobol](https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/sobol.png) |
 
-|            Halton             |            Latin Hypercube            |
-| :---------------------------: | :-----------------------------------: |
-| ![halton](.assets/halton.png) | ![latin-hypercube](.assets/latin.png) |
+|                                           Halton                                           |                                          Latin Hypercube                                           |
+| :----------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------: |
+| ![halton](https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/halton.png) | ![latin-hypercube](https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/latin.png) |
 
 ## References
 
