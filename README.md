@@ -19,8 +19,8 @@ py .\main.py -h
 ```
 
 ```powershell
-usage: main.py [-h] [-w WIDTH] [-c CELL_SIZE] [-o ORIENTATIONS] [-m {pseudo,sobol,halton,latin}]
-               [--simulate | --no-simulate] [--save | --no-save] [--load READ]
+usage: main.py [-h] [-w WIDTH] [-c CELL_SIZE] [-o ORIENTATIONS] [-m {pseudo,sobol,halton,latin}] [--simulate] [--save]
+               [--load READ]
 
 Generate microstructures and simulate their grain growth.
 
@@ -31,21 +31,20 @@ optional arguments:
   -o ORIENTATIONS       Inital grain size. Higher = Smaller grains. (default: 100)
   -m {pseudo,sobol,halton,latin}
                         Seed generation algorithm. (default: sobol)
-  --simulate, --no-simulate
-                        Simulate grain growth? (default: False)
-  --save, --no-save     Output generated microstructure to a file? (default: False)
+  --simulate            Simulate grain growth?
+  --save                Output generated microstructure to a file?
   --load READ           Load microstructure data from a .json file
 ```
 
 ## Resulting Grain Structures
 
-|                                           Pseudo                                           |                                          Sobol                                           |
-| :----------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------: |
-| ![pseudo](https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/pseudo.png) | ![sobol](https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/sobol.png) |
+|                                                              Pseudo                                                               |                                                              Sobol                                                              |
+| :-------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------: |
+| <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/pseudo.png" alt="pseudo" width="400" height="400"> | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/sobol.png" alt="sobol" width="400" height="400"> |
 
-|                                           Halton                                           |                                          Latin Hypercube                                           |
-| :----------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------: |
-| ![halton](https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/halton.png) | ![latin-hypercube](https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/latin.png) |
+|                                                              Halton                                                               |                                                              Latin Hypercube                                                              |
+| :-------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------: |
+| <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/halton.png" alt="halton" width="400" height="400"> | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/latin.png" alt="latin-hypercube" width="400" height="400"> |
 
 ## References
 
