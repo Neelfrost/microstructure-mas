@@ -39,7 +39,7 @@ class Matrix2D:
             "grid": self.grid,
         }
         with open(file_name, "w+") as file:
-            json.dump(output_dict, file)
+            json.dump(output_dict, file, separators=(",", ":"))
         print(f"Microstructure data saved as: {file_name}")  # }}}
 
     # Calculates the distance between 2 cells

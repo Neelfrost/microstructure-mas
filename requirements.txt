@@ -1,6 +1,4 @@
-﻿about-time==3.1.1
-alive-progress==2.0.0
-grapheme==0.6.0
 numpy==1.21.2
+alive_progress==2.0.0
 pygame==2.0.1
 scipy==1.7.1
