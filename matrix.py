@@ -1,28 +1,64 @@
 import json
+import os
 from math import log2
+from random import randint
 from time import time
 
-from alive_progress import alive_it
 import numpy as np
+from alive_progress import alive_it
 from scipy.stats import qmc
+
+from simulation import Simulate
+
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
+
+import pygame as pg
+import pygame.gfxdraw as gfxdraw
+from pygame.math import Vector2
 
 
 class Matrix2D:
-    # Define constructor
     def __init__(self, cols: int, rows: int, orientations: int, seed_method: str):
+        """Discrete matrix constructor.
+
+        Each cell of the grid belongs to a voronoi region i.e., a grain.
+
+        Args:
+            cols (int): Number of columns.
+            rows (int): Number of rows.
+            orientations (int): Total/maximum orientations possible within in the microstructure.
+            seed_method (str): Method used to create voronoi seeds.
+        """
         self.cols = cols
         self.rows = rows
         self.orientations = orientations
         self.seed_method = seed_method
-        self.grid = self.make_grid()
-        self.create_grains()
 
-    # Create a 2D array of size cols x rows initialized with zeros
-    def make_grid(self) -> list[list[int]]:
-        return [[0] * self.rows for _ in range(self.cols)]
+        # List of seed locations, List[Vector2(x, y),].
+        self.seeds = []
 
-    # Print self.grid
+        # Create a 2D array of size cols x rows initialized with zeros.
+        self.grid = [[0] * self.rows for _ in range(self.cols)]
+
+        # Turn the empty grid into a voronoi diagram.
+        self.create_microstructure()
+
+        # Generate random/unique colors for each individual orientation.
+        self.grain_colors = [
+            (randint(0, 255), randint(0, 255), randint(0, 255))
+            for _ in range(10 + max(map(max, self.grid)))
+        ]
+
+        # Create a simulator object to simulate grain growth/refinement.
+        self.simulator = Simulate(self)
+
     def __str__(self):
+        """Convert the matrix into a string so that 'print()' can be used.
+
+        Returns:
+            str: String representation of the matrix.
+
+        """
         arr = []
         for col in self.grid:
             for cell in col:
@@ -30,8 +66,9 @@ class Matrix2D:
             arr.append("\n")
         return "".join(arr)
 
-    def save_grid(self):  # {{{
-        file_name = "grid_" + str(int(time())) + ".json"
+    def save_grid(self):
+        """Save the attributes of the current matrix (microstructure) in a '.json' file."""
+        file_name = f"{self.seed_method}:{self.orientations}_{str(int(time()))}.json"
         output_dict = {
             "cols": self.cols,
             "rows": self.rows,
@@ -40,16 +77,10 @@ class Matrix2D:
         }
         with open(file_name, "w+") as file:
             json.dump(output_dict, file, separators=(",", ":"))
-        print(f"Microstructure data saved as: {file_name}")  # }}}
+        print(f"Microstructure data saved as: {file_name}")
 
-    # Calculates the distance between 2 cells
-    def distance_between_cells(self, start, end):
-        return (end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2
-
-    # Creates seeds (grain centers)
-    def create_seeds(self):  # {{{
-        # List of seed locations, tuple: (x, y)
-        self.seed_loc = []
+    def create_seeds(self):
+        """Randomly distribute seeds within the matrix using various methods."""
         seeds = np.empty(1)
         # pseudo random seed selection
         if self.seed_method == "pseudo":
@@ -63,7 +94,7 @@ class Matrix2D:
                 seed_x = int(seed / self.cols)
                 seed_y = seed % self.rows
                 self.grid[seed_x][seed_y] = seeds_itr.index + 1
-                self.seed_loc.append((seed_x, seed_y))
+                self.seeds.append(Vector2(seed_x, seed_y))
 
         # Low discrepancy seed selection
         else:
@@ -72,12 +103,12 @@ class Matrix2D:
                 seed_generator = qmc.Sobol(d=1, scramble=True)
                 seeds = seed_generator.random_base2(m=int(log2(self.orientations)))
             # halton's method
-            if self.seed_method == "halton":
+            elif self.seed_method == "halton":
                 seed_generator = qmc.Halton(d=1, scramble=True)
                 seeds = seed_generator.random(n=self.orientations)
                 np.random.shuffle(seeds)
-            # latinhypercude method
-            if self.seed_method == "latin":
+            # latin-hypercude method
+            elif self.seed_method == "latin":
                 seed_generator = qmc.LatinHypercube(d=1)
                 seeds = seed_generator.random(n=self.orientations)
                 np.random.shuffle(seeds)
@@ -91,40 +122,125 @@ class Matrix2D:
                 seed_x = int(seed / self.cols)
                 seed_y = seed % self.rows
                 self.grid[seed_x][seed_y] = seeds_itr.index + 1
-                self.seed_loc.append((seed_x, seed_y))  # }}}
+                self.seeds.append(Vector2(seed_x, seed_y))
 
-    # Creates grains with specific orientations
-    def create_zones(self):  # {{{
+    def get_nearest_seed(self, x, y):
+        """Calculates seed nearest to the current cell
+
+        Args:
+            x (int): x coordinate of current cell
+            y (int): y coordinate of current cell
+
+        Returns:
+            Vector2: nearest seed
+
+        """
+
+        nearest_seed = Vector2()
+        min_dist = self.cols * self.rows
+
+        for seed in self.seeds:
+            distance_between_seed_and_current_cell = Vector2(x, y).distance_squared_to(
+                seed
+            )
+
+            if distance_between_seed_and_current_cell < min_dist:
+                min_dist = distance_between_seed_and_current_cell
+                nearest_seed = seed
+
+        return nearest_seed
+
+    def create_grains(self):
+        """Create voronoi regions (grains) using the seed locations. Each region belongs to a specific crystallographic
+        orientation."""
         for i in alive_it(
             range(self.cols),
-            title="\033[38;5;102mGenerating microstructure...",
+            title="Generating microstructure...",
             bar="blocks",
             spinner=None,
             stats=False,
             monitor=False,
         ):
             for j in range(self.rows):
-                if self.grid[i][j] == 0:
-                    pre_min_dist = min_dist = self.cols * self.rows
-                    for seed in self.seed_loc:
-                        distance_between_seed_cell = self.distance_between_cells(
-                            (i, j), seed
-                        )
-                        if distance_between_seed_cell <= 128 ** 2:
-                            pre_min_dist = min_dist
-                            min_dist = min(pre_min_dist, distance_between_seed_cell)
-                            if min_dist < pre_min_dist:
-                                self.grid[i][j] = self.grid[seed[0]][seed[1]]
-                        else:
-                            continue  # }}}
+                if self.grid[i][j] != 0:
+                    continue
 
-    def create_grains(self):
+                nearest_seed = self.get_nearest_seed(i, j)
+                self.grid[i][j] = self.grid[int(nearest_seed.x)][int(nearest_seed.y)]
+
+    def create_microstructure(self):
         self.create_seeds()
-        self.create_zones()
+        self.create_grains()
+
+    def get_grayscale(self, current_orientation):
+        """Basically maps the range (1, self.orientations) to (0, 255).
+
+        Args:
+            current_orientation (int): Orientation value of current cell.
+
+        Returns: Tuple(int, int, int): Grayscale color corresponding to orientation of the cell.
+
+        """
+        shade = ((current_orientation - 1) * 255) // (self.orientations - 1)
+        return (shade, shade, shade)
+
+    def render(self, canvas, cell_size, colored=False):
+        """Draw the matrix (microstructure) with or without colored grains.
+
+        Args:
+            canvas (pygame.display): Pygame display.
+            cell_size (int): Size of cells.
+            colored (boolean): Should grains be colored? Default: grayscale grains.
+        """
+        if cell_size == 1:
+            for i in range(self.cols):
+                for j in range(self.rows):
+                    gfxdraw.pixel(
+                        canvas,
+                        i,
+                        j,
+                        self.grain_colors[min(self.grid[i][j], self.orientations - 1)]
+                        if colored
+                        else self.get_grayscale(self.grid[i][j]),
+                    )
+            for seed in self.seeds:
+                gfxdraw.pixel(canvas, int(seed.x), int(seed.y), (255, 0, 0))
+        else:
+            for i in range(self.cols):
+                for j in range(self.rows):
+                    pg.draw.rect(
+                        canvas,
+                        self.grain_colors[min(self.grid[i][j], self.orientations - 1)]
+                        if colored
+                        else self.get_grayscale(self.grid[i][j]),
+                        (
+                            i * cell_size,
+                            j * cell_size,
+                            cell_size,
+                            cell_size,
+                        ),
+                    )
+
+    def simulate(self, simulate=False):
+        """Simulate Monte Carlo Grain Growth.
+
+        Args:
+            simulate (boolean): Run simulation?
+
+        """
+        if not simulate:
+            return
+
+        for i in range(1000):
+            self.simulator.reorient(
+                (
+                    np.random.randint(0, self.cols - 1),
+                    np.random.randint(0, self.rows - 1),
+                )
+            )
 
 
 class Matrix2DFile(Matrix2D):
-    # Define constructor
     def __init__(self, file_name):
         with open(file_name, "r") as file:
             input_dict = json.load(file)
@@ -132,3 +248,6 @@ class Matrix2DFile(Matrix2D):
         self.rows = input_dict["rows"]
         self.orientations = input_dict["orientations"]
         self.grid = input_dict["grid"]
+
+
+# vim:foldnestmax=3
