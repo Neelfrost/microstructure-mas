@@ -1,7 +1,6 @@
 import json
 import os
-from math import log2
-from random import randint
+from math import ceil, log2
 from time import time
 
 import numpy as np
@@ -44,10 +43,9 @@ class Matrix2D:
         self.create_microstructure()
 
         # Generate random/unique colors for each individual orientation.
-        self.grain_colors = [
-            (randint(0, 255), randint(0, 255), randint(0, 255))
-            for _ in range(10 + max(map(max, self.grid)))
-        ]
+        self.grain_colors = np.random.randint(
+            0, 256, size=((10 + max(map(max, self.grid))), 3)
+        )
 
         # Create a simulator object to simulate grain growth/refinement.
         self.simulator = Simulate(self)
@@ -101,7 +99,7 @@ class Matrix2D:
             # sobol's method
             if self.seed_method == "sobol":
                 seed_generator = qmc.Sobol(d=1, scramble=True)
-                seeds = seed_generator.random_base2(m=int(log2(self.orientations)))
+                seeds = seed_generator.random_base2(m=ceil(log2(self.orientations)))
             # halton's method
             elif self.seed_method == "halton":
                 seed_generator = qmc.Halton(d=1, scramble=True)
@@ -181,7 +179,13 @@ class Matrix2D:
         Returns: Tuple(int, int, int): Grayscale color corresponding to orientation of the cell.
 
         """
-        shade = ((current_orientation - 1) * 255) // (self.orientations - 1)
+        # Work around for sobol sequence:
+        if self.seed_method == "sobol":
+            max_orientations = len(self.seeds)
+        else:
+            max_orientations = self.orientations
+
+        shade = ((current_orientation - 1) * 255) // (max_orientations - 1)
         return (shade, shade, shade)
 
     def render(self, canvas, cell_size, colored=False):
