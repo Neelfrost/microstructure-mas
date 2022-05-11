@@ -15,13 +15,14 @@ class Simulate:
         total_different_neighbors = 0
         # List of orientation of neighbors
         orientations = []
-        # Iterate over neighbors (von Neumann configuration)
+        # Iterate over neighbors (Moore configuration)
         for i in range(
-            max(0, lattice_site[0] - 1), min(lattice_site[0] + 1, self.matrix.cols) + 1
+            max(0, lattice_site[0] - 1),
+            min(lattice_site[0] + 1, self.matrix.cols - 1) + 1,
         ):
             for j in range(
                 max(0, lattice_site[1] - 1),
-                min(lattice_site[1] + 1, self.matrix.rows) + 1,
+                min(lattice_site[1] + 1, self.matrix.rows - 1) + 1,
             ):
                 if i != lattice_site[0] or j != lattice_site[1]:
                     # If orientation is provided

@@ -231,11 +231,11 @@ class Matrix2D:
         if not simulate:
             return
 
-        for i in range(1000):
+        for _ in range(1000):
             self.simulator.reorient(
                 (
-                    np.random.randint(0, self.cols - 1),
-                    np.random.randint(0, self.rows - 1),
+                    np.random.randint(0, self.cols),
+                    np.random.randint(0, self.rows),
                 )
             )
 
