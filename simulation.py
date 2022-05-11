@@ -1,3 +1,8 @@
+# Author: Neel Basak
+# Github: https://github.com/Neelfrost
+# File: simulation.py
+# License: GPL-3
+
 import numpy as np
 
 

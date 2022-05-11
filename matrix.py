@@ -1,3 +1,8 @@
+# Author: Neel Basak
+# Github: https://github.com/Neelfrost
+# File: matrix.py
+# License: GPL-3
+
 import json
 import os
 from math import ceil, log2

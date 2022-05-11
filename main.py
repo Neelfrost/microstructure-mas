@@ -1,3 +1,8 @@
+# Author: Neel Basak
+# Github: https://github.com/Neelfrost
+# File: main.py
+# License: GPL-3
+
 import argparse
 import os
 import sys
