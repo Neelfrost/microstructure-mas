@@ -3,91 +3,62 @@
 # File: main.py
 # License: GPL-3
 
-import argparse
 import os
 import sys
+from parser import parser
 
 from alive_progress import alive_bar
 
-from matrix import Matrix2D, Matrix2DFile
+from matrix import Matrix2D
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
 import pygame as pg
 
 
-# ------------------------------------ CLI ----------------------------------- #
-def parser():
-    # Init parser
-    parser = argparse.ArgumentParser(
-        description="Generate microstructures and simulate their grain growth.",
-    )
-    # Add args
-    parser.add_argument(
-        "-w",
-        "--width",
-        dest="width",
-        default=500,
-        type=int,
-        help="Window size. (default: 500)",
-    )
-    parser.add_argument(
-        "-c",
-        "--cell-size",
-        dest="cell_size",
-        default=5,
-        type=int,
-        help="Cell size. Lower = more anti-aliased. (default: 5, recommended: 1-10)",
-    )
-    parser.add_argument(
-        "-o",
-        "--orientations",
-        dest="orientations",
-        default=100,
-        type=int,
-        help="Inital grain size. Higher = Smaller grains. (default: 100)",
-    )
-    parser.add_argument(
-        "-m",
-        "--method",
-        # dest="method",
-        default="sobol",
-        choices=("pseudo", "sobol", "halton", "latin"),
-        type=str,
-        help="Seed generation algorithm. (default: sobol)",
-    )
-    parser.add_argument(
-        "--simulate",
-        # dest="simulate",
-        default=False,
-        help="Simulate grain growth?",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--color",
-        # dest="color",
-        default=False,
-        help="Show colored grains instead of gray scale",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--save",
-        # dest="dump",
-        default=False,
-        help="Output generated microstructure to a file?",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--load",
-        # dest="read",
-        help="Load microstructure data from a .json file",
+def unique_name(options, time, extension):
+    """Generate a unique name.
+
+    Args:
+        options (list): options used to generate the microstructure.
+        time (int): time passed since the start of the program.
+        extension (str): file extension of the image.
+
+    Returns:
+        str: Unique filename.
+    """
+    return (
+        f"micro_{'_'.join(f'{str(option)}{str(options.get(option))}' for option in options)}"
+        f"_t{str(time)}.{extension}"
     )
 
-    # Return args namespace
-    return parser.parse_args()
+
+def save_snapshot(canvas, width, cell_size, method, orientations, time):
+    """Pygame pygame.image.save wrapper.
+
+    Args:
+        canvas (Surface): Pygame surface object.
+        width (int): Window width in pixels.
+        cell_size (int): Cell size.
+        method (str): Total/maximum orientations possible within in the microstructure.
+        orientations (int): Method used to create voronoi seeds.
+        time (int): Time elapsed since start.
+    """
+    pg.image.save(
+        canvas,
+        unique_name(
+            {
+                "w": width,
+                "c": cell_size,
+                "m": method,
+                "o": orientations,
+            },
+            time,
+            "png",
+        ),
+    )
 
 
-# ----------------------------------- Main ----------------------------------- #
 def main():
     # Process arguments
     args = parser()
@@ -108,19 +79,10 @@ def main():
     ORIENTATIONS = args.orientations
 
     # Framerate
-    FRAMERATE = 30
+    FRAMERATE = 60
 
     # Init microstructure
-    if args.load is None:
-        grid = Matrix2D(SIZE, SIZE, ORIENTATIONS, METHOD)
-    else:
-        grid = Matrix2DFile(args.load)
-        GRID_CELL_SIZE = WIDTH // grid.cols
-        ORIENTATIONS = grid.orientations
-
-    # Save grid if "--save"
-    if args.save:
-        grid.save_grid()
+    grid = Matrix2D(SIZE, SIZE, ORIENTATIONS, METHOD)
 
     # Setup pygame
     pg.init()
@@ -139,6 +101,24 @@ def main():
     # Clear canvas
     canvas.fill((220, 223, 228))
 
+    # Draw matrix (microstructure) once to capture an image
+    grid.render(canvas, GRID_CELL_SIZE, colored=args.color)
+
+    # Save the image of microstructure at current time
+    if args.snapshot != 0:
+        # Capture microstructures every _ seconds
+        time_in_seconds = args.snapshot
+        pg.time.set_timer(pg.USEREVENT, time_in_seconds * 1000)
+
+        save_snapshot(
+            canvas,
+            WIDTH,
+            GRID_CELL_SIZE,
+            METHOD,
+            ORIENTATIONS,
+            0,
+        )
+
     with alive_bar(
         title="Running...", bar=None, monitor=None, stats=None, spinner=None
     ):
@@ -151,6 +131,18 @@ def main():
 
             # Handle pygame events
             for event in pg.event.get():
+                if event.type == pg.USEREVENT and (
+                    args.snapshot != 0 and args.simulate
+                ):
+                    # Save the image of microstructure at current time
+                    save_snapshot(
+                        canvas,
+                        WIDTH,
+                        GRID_CELL_SIZE,
+                        METHOD,
+                        ORIENTATIONS,
+                        pg.time.get_ticks() // 1000,
+                    )
                 if event.type == pg.QUIT:
                     pg.quit()
                     sys.exit()
@@ -159,9 +151,6 @@ def main():
                     if event.key == pg.K_ESCAPE:
                         pg.quit()
                         sys.exit()
-                    # Save grid when 's' is pressed
-                    elif event.key == pg.K_s:
-                        grid.save_grid()
 
             pg.display.update()
             clock.tick(FRAMERATE)

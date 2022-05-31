@@ -3,10 +3,8 @@
 # File: matrix.py
 # License: GPL-3
 
-import json
 import os
 from math import ceil, log2
-from time import time
 
 import numpy as np
 from alive_progress import alive_it
@@ -49,7 +47,7 @@ class Matrix2D:
 
         # Generate random/unique colors for each individual orientation.
         self.grain_colors = np.random.randint(
-            0, 256, size=((10 + max(map(max, self.grid))), 3)
+            0, 256, size=(max(map(max, self.grid)), 3)
         )
 
         # Create a simulator object to simulate grain growth/refinement.
@@ -68,19 +66,6 @@ class Matrix2D:
                 arr.append(str(cell) + ", ")
             arr.append("\n")
         return "".join(arr)
-
-    def save_grid(self):
-        """Save the attributes of the current matrix (microstructure) in a '.json' file."""
-        file_name = f"{self.seed_method}:{self.orientations}_{str(int(time()))}.json"
-        output_dict = {
-            "cols": self.cols,
-            "rows": self.rows,
-            "orientations": self.orientations,
-            "grid": self.grid,
-        }
-        with open(file_name, "w+") as file:
-            json.dump(output_dict, file, separators=(",", ":"))
-        print(f"Microstructure data saved as: {file_name}")
 
     def create_seeds(self):
         """Randomly distribute seeds within the matrix using various methods."""
@@ -212,8 +197,6 @@ class Matrix2D:
                         if colored
                         else self.get_grayscale(self.grid[i][j]),
                     )
-            for seed in self.seeds:
-                gfxdraw.pixel(canvas, int(seed.x), int(seed.y), (255, 0, 0))
         else:
             for i in range(self.cols):
                 for j in range(self.rows):
@@ -247,16 +230,3 @@ class Matrix2D:
                     np.random.randint(0, self.rows),
                 )
             )
-
-
-class Matrix2DFile(Matrix2D):
-    def __init__(self, file_name):
-        with open(file_name, "r") as file:
-            input_dict = json.load(file)
-        self.cols = input_dict["cols"]
-        self.rows = input_dict["rows"]
-        self.orientations = input_dict["orientations"]
-        self.grid = input_dict["grid"]
-
-
-# vim:foldnestmax=3
