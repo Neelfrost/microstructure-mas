@@ -10,7 +10,7 @@ import numpy as np
 from alive_progress import alive_it
 from scipy.stats import qmc
 
-from simulation import Simulate
+from micro.simulation import Simulate
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 

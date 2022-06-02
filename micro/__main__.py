@@ -1,15 +1,15 @@
 # Author: Neel Basak
 # Github: https://github.com/Neelfrost
-# File: main.py
+# File: __main__.py
 # License: GPL-3
 
 import os
 import sys
-from parser import parser
 
 from alive_progress import alive_bar
 
-from matrix import Matrix2D
+from micro.matrix import Matrix2D
+from micro.parser import parser
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
