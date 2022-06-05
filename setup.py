@@ -17,6 +17,7 @@ setup(
     author_email="neelfrost@gmail.com",
     license=read_contents("LICENSE"),
     packages=["micro"],
+    package_data={"micro": ["assets/icon.png"]},
     install_requires=read_contents("requirements.txt").splitlines(),
     entry_points={"console_scripts": ["micro = micro.__main__:main"]},
     classifiers=[

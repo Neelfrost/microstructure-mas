@@ -6,6 +6,7 @@
 import os
 import sys
 
+import pkg_resources
 from alive_progress import alive_bar
 
 from micro.matrix import Matrix2D
@@ -88,9 +89,10 @@ def main():
     pg.init()
     pg.display.set_caption("Microstructure Simulation")
 
-    # Set application window icon
-    icon = pg.image.load(os.path.join(os.path.abspath("."), "icon.png"))
-    pg.display.set_icon(icon)
+    # # Set application window icon
+    pg.display.set_icon(
+        pg.image.load(pkg_resources.resource_filename("micro", "assets/icon.png"))
+    )
 
     # Create canvas
     canvas = pg.display.set_mode((WIDTH, HEIGHT))
