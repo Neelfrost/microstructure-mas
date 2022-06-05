@@ -47,15 +47,18 @@ def save_snapshot(canvas, width, cell_size, method, orientations, time):
     """
     pg.image.save(
         canvas,
-        unique_name(
-            {
-                "w": width,
-                "c": cell_size,
-                "m": method,
-                "o": orientations,
-            },
-            time,
-            "png",
+        os.path.join(
+            os.path.abspath("."),
+            unique_name(
+                {
+                    "w": width,
+                    "c": cell_size,
+                    "m": method,
+                    "o": orientations,
+                },
+                time,
+                "png",
+            ),
         ),
     )
 
