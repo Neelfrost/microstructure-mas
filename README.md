@@ -1,50 +1,67 @@
-## Usage
+<p align="center">
+    <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/icon.gif" alt="slideshare-dl logo" width="192">
+</p>
+
+<h1 align="center">Microstructure Modeling and Simulation</h1>
+
+<p align="center">
+  Generate microstructures using site-saturation condition, and simulate grain growth using Monte Carlo Potts Model.
+</p>
+
+https://user-images.githubusercontent.com/64243795/172417152-be09b5d2-f71e-4dc0-8d4f-c78993d95f70.mp4
+
+## Installation
 
 Clone repo:
 
-```powershell
-git clone https://github.com/Neelfrost/grain-py.git grain_py; cd .\grain_py\
+```shell
+git clone https://github.com/Neelfrost/microstructure-mas; cd .\microstructure-mas
 ```
 
-Install dependencies:
+Install using pip:
 
-```powershell
-pip install -I -r requirements.txt
+```shell
+pip install .
 ```
 
-Run script:
+## Usage
 
-```powershell
-py .\main.py -h
+```shell
+mmas.exe --help
 ```
 
-```powershell
-usage: main.py [-h] [-w WIDTH] [-c CELL_SIZE] [-o ORIENTATIONS] [-m {pseudo,sobol,halton,latin}] [--simulate] [--save]
-               [--load READ]
+```shell
+usage: mmas [-h] [-w WIDTH] [-c CELL_SIZE] [-o ORIENTATIONS] [-m {pseudo,sobol,halton,latin}] [--simulate] [--color]
+            [--snapshot SNAPSHOT]
 
-Generate microstructures and simulate their grain growth.
+Microstructure Modeling and Simulation. Generate microstructures using site-saturation condition, and simulate grain
+growth using Monte Carlo Potts Model.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -w WIDTH              Window size. (default: 500)
-  -c CELL_SIZE          Cell size. Lower = more anti-aliased. (default: 5, recommended: 1-10)
-  -o ORIENTATIONS       Inital grain size. Higher = Smaller grains. (default: 100)
-  -m {pseudo,sobol,halton,latin}
+  -w WIDTH, --width WIDTH
+                        Window size. (default: 500)
+  -c CELL_SIZE, --cell-size CELL_SIZE
+                        Cell size. Lower = more anti-aliased. (default: 5, recommended: 1-10)
+  -o ORIENTATIONS, --orientations ORIENTATIONS
+                        Inital grain size. Higher = Smaller grains. (default: 100)
+  -m {pseudo,sobol,halton,latin}, --method {pseudo,sobol,halton,latin}
                         Seed generation algorithm. (default: sobol)
   --simulate            Simulate grain growth?
-  --save                Output generated microstructure to a file?
-  --load READ           Load microstructure data from a .json file
+  --color               Show colored grains instead of gray scale
+  --snapshot SNAPSHOT   Save snapshots of microstructure every _ seconds. Will save only one snapshot without
+                        simulation. (default: never)
 ```
 
-## Resulting Grain Structures
+## Resulting Microstructures
 
 |                                                              Pseudo                                                               |                                                              Sobol                                                              |
 | :-------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------: |
-| <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/pseudo.png" alt="pseudo" width="400" height="400"> | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/sobol.png" alt="sobol" width="400" height="400"> |
+| <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_mpseudo_o500_mcs0_t0.png" alt="pseudo" width="400" height="400"> | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_msobol_o500_mcs0_t0.png" alt="sobol" width="400" height="400"> |
 
 |                                                              Halton                                                               |                                                              Latin Hypercube                                                              |
 | :-------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------: |
-| <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/halton.png" alt="halton" width="400" height="400"> | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/grain/latin.png" alt="latin-hypercube" width="400" height="400"> |
+| <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_mhalton_o500_mcs0_t0.png" alt="halton" width="400" height="400"> | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_mlatin_o500_mcs0_t0.png" alt="latin-hypercube" width="400" height="400"> |
 
 ## References
 
