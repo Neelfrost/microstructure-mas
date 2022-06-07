@@ -223,6 +223,7 @@ class Matrix2D:
         if not simulate:
             return
 
+        pg.display.set_caption(f"Microstructure Simulation MCS: {self.simulator.mcs}")
         for _ in range(1000):
             self.simulator.reorient(
                 (

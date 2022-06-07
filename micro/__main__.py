@@ -34,7 +34,7 @@ def unique_name(options, time, extension):
     )
 
 
-def save_snapshot(canvas, width, cell_size, method, orientations, time):
+def save_snapshot(canvas, width, cell_size, method, orientations, time, mcs):
     """Pygame pygame.image.save wrapper.
 
     Args:
@@ -55,6 +55,7 @@ def save_snapshot(canvas, width, cell_size, method, orientations, time):
                     "c": cell_size,
                     "m": method,
                     "o": orientations,
+                    "mcs": mcs,
                 },
                 time,
                 "png",
@@ -116,12 +117,7 @@ def main():
         pg.time.set_timer(pg.USEREVENT, time_in_seconds * 1000)
 
         save_snapshot(
-            canvas,
-            WIDTH,
-            GRID_CELL_SIZE,
-            METHOD,
-            ORIENTATIONS,
-            0,
+            canvas, WIDTH, GRID_CELL_SIZE, METHOD, ORIENTATIONS, 0, grid.simulator.mcs
         )
 
     with alive_bar(
@@ -147,6 +143,7 @@ def main():
                         METHOD,
                         ORIENTATIONS,
                         pg.time.get_ticks() // 1000,
+                        grid.simulator.mcs,
                     )
                 if event.type == pg.QUIT:
                     pg.quit()

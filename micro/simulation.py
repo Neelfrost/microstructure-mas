@@ -9,10 +9,14 @@ import numpy as np
 class Simulate:
     def __init__(self, matrix):
         self.matrix = matrix
+
         self.grain_boundary_energy = 1
         self.temperature = 0
         self.boltz_const = 1
         self.nearest_neighbors = 8
+
+        self.reorientation_attempts = 0
+        self.mcs = 0
 
     # Calculate neighbors with different lattice orientation of given lattice site
     def different_neighbors(self, lattice_site, orientation=None):
@@ -77,9 +81,9 @@ class Simulate:
         # Calculate change in free energy
         delta_free_energy = possible_free_energy - current_free_energy
 
-        # TODO: implement transition probability
-        # self.transition_probability
-
         # Assign new_orientation if free energy is lower
         if delta_free_energy <= 0:
             self.matrix.grid[lattice_site[0]][lattice_site[1]] = new_orientation
+            self.reorientation_attempts += 1
+
+        self.mcs = self.reorientation_attempts // (self.matrix.rows * self.matrix.cols)
