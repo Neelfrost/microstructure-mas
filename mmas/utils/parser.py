@@ -9,7 +9,11 @@ import argparse
 def parser():
     # Init parser
     parser = argparse.ArgumentParser(
-        description="Generate microstructures and simulate their grain growth.",
+        description=(
+            "Microstructure Modeling and Simulation."
+            " Generate microstructures using site-saturation condition,"
+            " and simulate grain growth using Monte Carlo Potts Model."
+        ),
     )
     # Add args
     parser.add_argument(
@@ -63,3 +67,5 @@ def parser():
 
     # Return args namespace
     return parser.parse_args()
+
+

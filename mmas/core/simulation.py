@@ -87,3 +87,5 @@ class Simulate:
             self.reorientation_attempts += 1
 
         self.mcs = self.reorientation_attempts // (self.matrix.rows * self.matrix.cols)
+
+

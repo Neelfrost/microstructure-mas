@@ -1,16 +1,16 @@
 # Author: Neel Basak
 # Github: https://github.com/Neelfrost
-# File: __main__.py
+# File: main.py
 # License: GPL-3
 
 import os
 import sys
 
-import pkg_resources
 from alive_progress import alive_bar
+from pkg_resources import resource_filename
 
-from micro.matrix import Matrix2D
-from micro.parser import parser
+from mmas.core.matrix import Matrix2D
+from mmas.utils.parser import parser
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
@@ -91,11 +91,11 @@ def main():
 
     # Setup pygame
     pg.init()
-    pg.display.set_caption("Microstructure Simulation")
+    pg.display.set_caption("Microstructure Modeling & Simulation")
 
     # # Set application window icon
     pg.display.set_icon(
-        pg.image.load(pkg_resources.resource_filename("micro", "assets/icon.png"))
+        pg.image.load(resource_filename(__name__, "../assets/icon.png"))
     )
 
     # Create canvas
@@ -160,3 +160,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -10,7 +10,7 @@ import numpy as np
 from alive_progress import alive_it
 from scipy.stats import qmc
 
-from micro.simulation import Simulate
+from mmas.core.simulation import Simulate
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
@@ -231,3 +231,5 @@ class Matrix2D:
                     np.random.randint(0, self.rows),
                 )
             )
+
+
