@@ -20,7 +20,16 @@ from pygame.math import Vector2
 
 
 class Matrix2D:
-    def __init__(self, cols: int, rows: int, orientations: int, seed_method: str):
+    def __init__(
+        self,
+        cols: int,
+        rows: int,
+        orientations: int,
+        seed_method: str,
+        temperature: float,
+        grain_boundary_energy: float,
+        boltz_const: float,
+    ):
         """Discrete matrix constructor.
 
         Each cell of the grid belongs to a voronoi region i.e., a grain.
@@ -51,7 +60,7 @@ class Matrix2D:
         )
 
         # Create a simulator object to simulate grain growth/refinement.
-        self.simulator = Simulate(self)
+        self.simulator = Simulate(self, temperature, grain_boundary_energy, boltz_const)
 
     def __str__(self):
         """Convert the matrix into a string so that 'print()' can be used.
@@ -223,7 +232,9 @@ class Matrix2D:
         if not simulate:
             return
 
-        pg.display.set_caption(f"Microstructure Simulation MCS: {self.simulator.mcs}")
+        pg.display.set_caption(
+            f"Microstructure Modeling & Simulation MCS: {self.simulator.mcs}"
+        )
         for _ in range(1000):
             self.simulator.reorient(
                 (

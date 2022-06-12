@@ -7,10 +7,9 @@ import os
 import sys
 
 from alive_progress import alive_bar
-from pkg_resources import resource_filename
-
 from mmas.core.matrix import Matrix2D
 from mmas.utils.parser import parser
+from pkg_resources import resource_filename
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
@@ -87,13 +86,15 @@ def main():
     FRAMERATE = 60
 
     # Init microstructure
-    grid = Matrix2D(SIZE, SIZE, ORIENTATIONS, METHOD)
+    grid = Matrix2D(
+        SIZE, SIZE, ORIENTATIONS, METHOD, args.temperature, args.grain, args.boltz
+    )
 
     # Setup pygame
     pg.init()
     pg.display.set_caption("Microstructure Modeling & Simulation")
 
-    # # Set application window icon
+    # Set application window icon
     pg.display.set_icon(
         pg.image.load(resource_filename(__name__, "../assets/icon.png"))
     )
