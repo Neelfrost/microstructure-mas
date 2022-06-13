@@ -7,13 +7,30 @@ import os
 import sys
 
 from alive_progress import alive_bar
+from pkg_resources import resource_filename
+
 from mmas.core.matrix import Matrix2D
 from mmas.utils.parser import parser
-from pkg_resources import resource_filename
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
 import pygame as pg
+
+
+def pad_left(content, amount):
+    """Add leading zeros to given content.
+
+    Args:
+        content (any): Content to be left padded with zeros.
+        amount (int): Final length of content (amount + len(content)).
+
+    Returns:
+        str: Left padded content.
+    """
+    if isinstance(content, str):
+        return content.zfill(amount)
+
+    return str(content).zfill(amount)
 
 
 def unique_name(options, time, extension):
@@ -54,9 +71,9 @@ def save_snapshot(canvas, width, cell_size, method, orientations, time, mcs):
                     "c": cell_size,
                     "m": method,
                     "o": orientations,
-                    "mcs": mcs,
+                    "mcs": pad_left(mcs, 4),
                 },
-                time,
+                pad_left(time, 6),
                 "png",
             ),
         ),
@@ -161,4 +178,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
