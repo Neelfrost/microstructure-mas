@@ -81,31 +81,42 @@ def save_snapshot(canvas, width, cell_size, method, orientations, time, mcs):
 
 
 def main():
-    # Process arguments
+    # Parse arguments
     args = parser()
-
-    # Window size
-    WIDTH = HEIGHT = args.width
-
-    # Size of a cell (i.e., resolution), lower = more anti-aliased
-    GRID_CELL_SIZE = min(WIDTH, max(args.cell_size, 1))
-
-    # Number of cols, rows
-    SIZE = WIDTH // GRID_CELL_SIZE
-
-    # Seed generation algorithm
-    METHOD = args.method
-
-    # Grain size
-    ORIENTATIONS = args.orientations
 
     # Framerate
     FRAMERATE = 60
 
-    # Init microstructure
-    grid = Matrix2D(
-        SIZE, SIZE, ORIENTATIONS, METHOD, args.temperature, args.grain, args.boltz
-    )
+    if args.load:
+        data = Matrix2D.load(args.load)
+        WIDTH = data.get("rows") * data.get("grid_cell_size")
+        GRID_CELL_SIZE = data.get("grid_cell_size")
+    else:
+        # Window size
+        WIDTH = args.width
+
+        # Size of a cell, lower = sharper edges
+        GRID_CELL_SIZE = min(WIDTH, max(args.cell_size, 1))
+
+        # Number of cols, rows
+        SIZE = WIDTH // GRID_CELL_SIZE
+
+        data = {
+            "rows": SIZE,
+            "cols": SIZE,
+            "grid_cell_size": GRID_CELL_SIZE,
+            "orientations": args.orientations,
+            "seed_method": args.method,
+            "temperature": args.temperature,
+            "grain_boundary_energy": args.grain,
+            "boltz_const": args.boltz,
+        }
+
+    # Create microstructure
+    grid = Matrix2D(data)
+
+    if args.save:
+        grid.save()
 
     # Setup pygame
     pg.init()
@@ -117,16 +128,13 @@ def main():
     )
 
     # Create canvas
-    canvas = pg.display.set_mode((WIDTH, HEIGHT))
+    canvas = pg.display.set_mode((WIDTH, WIDTH))
 
     # Create clock
     clock = pg.time.Clock()
 
-    # Clear canvas
-    canvas.fill((220, 223, 228))
-
     # Draw matrix (microstructure) once to capture an image
-    grid.render(canvas, GRID_CELL_SIZE, colored=args.color)
+    grid.render(canvas, colored=args.color)
 
     # Save the image of microstructure at current time
     if args.snapshot != 0:
@@ -135,7 +143,13 @@ def main():
         pg.time.set_timer(pg.USEREVENT, time_in_seconds * 1000)
 
         save_snapshot(
-            canvas, WIDTH, GRID_CELL_SIZE, METHOD, ORIENTATIONS, 0, grid.simulator.mcs
+            canvas,
+            WIDTH,
+            GRID_CELL_SIZE,
+            data.get("seed_method"),
+            data.get("orientations"),
+            0,
+            grid.simulator.mcs,
         )
 
     with alive_bar(
@@ -146,7 +160,7 @@ def main():
             grid.simulate(simulate=args.simulate)
 
             # Draw matrix (microstructure)
-            grid.render(canvas, GRID_CELL_SIZE, colored=args.color)
+            grid.render(canvas, colored=args.color)
 
             # Handle pygame events
             for event in pg.event.get():
@@ -158,8 +172,8 @@ def main():
                         canvas,
                         WIDTH,
                         GRID_CELL_SIZE,
-                        METHOD,
-                        ORIENTATIONS,
+                        data.get("seed_method"),
+                        data.get("orientations"),
                         pg.time.get_ticks() // 1000,
                         grid.simulator.mcs,
                     )
@@ -174,9 +188,5 @@ def main():
 
             pg.display.update()
             clock.tick(FRAMERATE)
-
-
-if __name__ == "__main__":
-    main()
 
 

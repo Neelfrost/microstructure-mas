@@ -3,8 +3,10 @@
 # File: matrix.py
 # License: GPL-3
 
+import json
 import os
 from math import ceil, log2
+from uuid import uuid4
 
 import numpy as np
 from alive_progress import alive_it
@@ -20,61 +22,46 @@ from pygame.math import Vector2
 
 
 class Matrix2D:
-    def __init__(
-        self,
-        cols: int,
-        rows: int,
-        orientations: int,
-        seed_method: str,
-        temperature: float,
-        grain_boundary_energy: float,
-        boltz_const: float,
-    ):
+    def __init__(self, data):
         """Discrete matrix constructor.
 
         Each cell of the grid belongs to a voronoi region i.e., a grain.
 
         Args:
-            cols (int): Number of columns.
-            rows (int): Number of rows.
-            orientations (int): Total/maximum orientations possible within in the microstructure.
-            seed_method (str): Method used to create voronoi seeds.
+            data (Dict): Dictionary containing the following data:
+                cols, rows, cell_size, orientations, seed_method, temperature, grain_boundary_energy, boltz_const
+                optionally: seeds, grid, grain_colors
+
         """
-        self.cols = cols
-        self.rows = rows
-        self.orientations = orientations
-        self.seed_method = seed_method
+        self.cols = data.get("cols")
+        self.rows = data.get("rows")
+        self.cell_size = data.get("grid_cell_size")
+        self.orientations = data.get("orientations")
+        self.seed_method = data.get("seed_method")
+        self.temperature = data.get("temperature")
+        self.grain_boundary_energy = data.get("grain_boundary_energy")
+        self.boltz_const = data.get("boltz_const")
 
         # List of seed locations, List[Vector2(x, y),].
-        self.seeds = []
+        self.seeds = data.get("seeds", [])
 
         # Create a 2D array of size cols x rows initialized with zeros.
-        self.grid = [[0] * self.rows for _ in range(self.cols)]
+        self.grid = data.get("grid", [[0] * self.rows for _ in range(self.cols)])
 
         # Turn the empty grid into a voronoi diagram.
-        self.create_microstructure()
+        if not data.get("grid"):
+            self.create_microstructure()
 
         # Generate random/unique colors for each individual orientation.
-        self.grain_colors = np.random.randint(
-            0, 256, size=(max(map(max, self.grid)), 3)
+        self.grain_colors = data.get(
+            "grain_colors",
+            np.random.randint(0, 256, size=(max(map(max, self.grid)), 3)),
         )
 
         # Create a simulator object to simulate grain growth/refinement.
-        self.simulator = Simulate(self, temperature, grain_boundary_energy, boltz_const)
-
-    def __str__(self):
-        """Convert the matrix into a string so that 'print()' can be used.
-
-        Returns:
-            str: String representation of the matrix.
-
-        """
-        arr = []
-        for col in self.grid:
-            for cell in col:
-                arr.append(str(cell) + ", ")
-            arr.append("\n")
-        return "".join(arr)
+        self.simulator = Simulate(
+            self, self.temperature, self.grain_boundary_energy, self.boltz_const
+        )
 
     def create_seeds(self):
         """Randomly distribute seeds within the matrix using various methods."""
@@ -132,7 +119,6 @@ class Matrix2D:
             Vector2: nearest seed
 
         """
-
         nearest_seed = Vector2()
         min_dist = self.cols * self.rows
 
@@ -187,7 +173,7 @@ class Matrix2D:
         shade = ((current_orientation - 1) * 255) // (max_orientations - 1)
         return (shade, shade, shade)
 
-    def render(self, canvas, cell_size, colored=False):
+    def render(self, canvas, colored=False):
         """Draw the matrix (microstructure) with or without colored grains.
 
         Args:
@@ -195,7 +181,7 @@ class Matrix2D:
             cell_size (int): Size of cells.
             colored (boolean): Should grains be colored? Default: grayscale grains.
         """
-        if cell_size == 1:
+        if self.cell_size == 1:
             for i in range(self.cols):
                 for j in range(self.rows):
                     gfxdraw.pixel(
@@ -215,10 +201,10 @@ class Matrix2D:
                         if colored
                         else self.get_grayscale(self.grid[i][j]),
                         (
-                            i * cell_size,
-                            j * cell_size,
-                            cell_size,
-                            cell_size,
+                            i * self.cell_size,
+                            j * self.cell_size,
+                            self.cell_size,
+                            self.cell_size,
                         ),
                     )
 
@@ -242,5 +228,37 @@ class Matrix2D:
                     np.random.randint(0, self.rows),
                 )
             )
+
+    def save(self):
+        """Save the attributes of the matrix/microstructure as a json file in the current working directory."""
+        file_name = f"mmas_{uuid4().hex}.json"
+
+        output = {
+            "cols": self.cols,
+            "rows": self.rows,
+            "grid_cell_size": self.cell_size,
+            "orientations": self.orientations,
+            "seed_method": self.seed_method,
+            "grid": self.grid,
+            # Convert to list of list since Vector2 is not serializable
+            "seeds": list(map(list, self.seeds)),
+            # Convert to list since ndarray is not serializable
+            "grain_colors": self.grain_colors.tolist(),
+            "temperature": self.temperature,
+            "grain_boundary_energy": self.grain_boundary_energy,
+            "boltz_const": self.boltz_const,
+        }
+
+        with open(file_name, "w+") as file:
+            json.dump(output, file, separators=(",", ":"))
+
+        print(f"Microstructure data saved as: {file_name}")
+
+    @staticmethod
+    def load(file_name):
+        """Load the attributes of the matrix/microstructure from a json file in the current working directory."""
+        with open(file_name, "r") as file:
+            print(f"Microstructure data loaded from: {file_name}.")
+            return json.load(file)
 
 

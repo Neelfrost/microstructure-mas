@@ -88,6 +88,17 @@ def parser():
             " Will save only one snapshot without simulation. (default: never)"
         ),
     )
+    parser.add_argument(
+        "--save",
+        default=False,
+        help="Save microstructure data to a file. (default: false)",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--load",
+        type=TextIOBase,
+        help="Load microstructure data from a file.",
+    )
 
     # Return args namespace
     return parser.parse_args()
