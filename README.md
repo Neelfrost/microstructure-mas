@@ -14,53 +14,54 @@ https://user-images.githubusercontent.com/64243795/172417152-be09b5d2-f71e-4dc0-
 
 Clone repo:
 
-```shell
+```
 git clone https://github.com/Neelfrost/microstructure-mas; cd .\microstructure-mas
 ```
 
 Install using pip:
 
-```shell
+```
 pip install .
 ```
 
 ## Usage
 
-```shell
+```
 mmas.exe --help
 ```
 
-```shell
-usage: mmas [-h] [-w WIDTH] [-c CELL_SIZE] [-o ORIENTATIONS] [-m {pseudo,sobol,halton,latin}] [--simulate] [--color]
-            [--snapshot SNAPSHOT]
+```
+usage: mmas [-h] [-w int] [-c int] [-o int] [-m {pseudo,sobol,halton,latin}] [-T float] [-b float] [-g float]
+            [--simulate] [--color] [--snapshot int] [--save] [--load TextIOBase]
 
 Microstructure Modeling and Simulation. Generate microstructures using site-saturation condition, and simulate grain
 growth using Monte Carlo Potts Model.
 
 options:
-  -h, --help            show this help message and exit
-  -w WIDTH, --width WIDTH
-                        Window size. (default: 500)
-  -c CELL_SIZE, --cell-size CELL_SIZE
-                        Cell size. Lower = more anti-aliased. (default: 5, recommended: 1-10)
-  -o ORIENTATIONS, --orientations ORIENTATIONS
-                        Inital grain size. Higher = Smaller grains. (default: 100)
-  -m {pseudo,sobol,halton,latin}, --method {pseudo,sobol,halton,latin}
-                        Seed generation algorithm. (default: sobol)
-  --simulate            Simulate grain growth?
-  --color               Show colored grains instead of gray scale
-  --snapshot SNAPSHOT   Save snapshots of microstructure every _ seconds. Will save only one snapshot without
-                        simulation. (default: never)
+  -h, --help          Show this message and exit.
+  -w, --width         Application window size. (default: 500)
+  -c, --cell-size     Grid cell size, lower = sharper boundaries. (default: 5, recommended: 1-10)
+  -o, --orientations  Inital grain size, higher = smaller grains. (default: 100)
+  -m, --method        Seed generation algorithm. Allowed values are: pseudo, sobol, halton, latin. (default: sobol)
+  -T, --temperature   Simulation temperature. (default: 0, recommended: 0-2)
+  -b, --boltz         Boltzmann constant. (default: 1)
+  -g, --grain         Grain boundary energy. (default: 1)
+  --simulate          Simulate grain growth. (default: false)
+  --color             Instead of using grayscale, display colored grains. (default: false)
+  --snapshot          Every specified number of seconds, save images of the microstructure. Only one image is saved
+                      without simulation. (default: never)
+  --save              Save microstructure data to a file. (default: false)
+  --load              Load microstructure data from a file.
 ```
 
 ## Resulting Microstructures
 
-|                                                              Pseudo                                                               |                                                              Sobol                                                              |
-| :-------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------: |
+|                                                                                   Pseudo                                                                                   |                                                                                  Sobol                                                                                   |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_mpseudo_o500_mcs0_t0.png" alt="pseudo" width="400" height="400"> | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_msobol_o500_mcs0_t0.png" alt="sobol" width="400" height="400"> |
 
-|                                                              Halton                                                               |                                                              Latin Hypercube                                                              |
-| :-------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------: |
+|                                                                                   Halton                                                                                   |                                                                                  Latin Hypercube                                                                                   |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_mhalton_o500_mcs0_t0.png" alt="halton" width="400" height="400"> | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_mlatin_o500_mcs0_t0.png" alt="latin-hypercube" width="400" height="400"> |
 
 ## References

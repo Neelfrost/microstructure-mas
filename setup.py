@@ -8,7 +8,7 @@ def read_contents(fname):
 
 setup(
     name="microstructure-mas",
-    version="0.2.0",
+    version="0.2.1",
     description=(
         "Microstructure Modeling and Simulation."
         " Generate microstructures using site-saturation condition,"

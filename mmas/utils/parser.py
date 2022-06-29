@@ -4,24 +4,58 @@
 # License: GPL-3
 
 import argparse
+from io import TextIOBase
+
+
+class CustomFormatter(argparse.HelpFormatter):
+    def _format_action_invocation(self, action):
+        """Remove metavar from 'options:' list."""
+        if not action.option_strings:
+            default = self._get_default_metavar_for_positional(action)
+            (metavar,) = self._metavar_formatter(action, default)(1)
+            return metavar
+
+        else:
+            parts = []
+            # Format options like:
+            #    -s, --long <help>
+            parts.extend(action.option_strings)
+
+            return ", ".join(parts)
+
+    def _get_default_metavar_for_optional(self, action):
+        """Use argument 'type' as the default metavar value when possible."""
+        try:
+            return action.type.__name__
+        except AttributeError:
+            return action.dest
 
 
 def parser():
-    # Init parser
+    METHODS = ("pseudo", "sobol", "halton", "latin")
+
     parser = argparse.ArgumentParser(
+        add_help=False,
         description=(
             "Microstructure Modeling and Simulation."
             " Generate microstructures using site-saturation condition,"
             " and simulate grain growth using Monte Carlo Potts Model."
         ),
+        formatter_class=CustomFormatter,
     )
-    # Add args
+
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="help",
+        help="Show this message and exit.",
+    )
     parser.add_argument(
         "-w",
         "--width",
         default=500,
         type=int,
-        help="Window size. (default: 500)",
+        help="Application window size. (default: 500)",
     )
     parser.add_argument(
         "-c",
@@ -42,9 +76,9 @@ def parser():
         "-m",
         "--method",
         default="sobol",
-        choices=("pseudo", "sobol", "halton", "latin"),
+        choices=METHODS,
         type=str,
-        help="Seed generation algorithm. (default: sobol)",
+        help=f"Seed generation algorithm. Allowed values are: {', '.join(METHODS)}. (default: sobol)",
     )
     parser.add_argument(
         "-T",
@@ -70,13 +104,13 @@ def parser():
     parser.add_argument(
         "--simulate",
         default=False,
-        help="Simulate grain growth? (default: false)",
+        help="Simulate grain growth. (default: false)",
         action="store_true",
     )
     parser.add_argument(
         "--color",
         default=False,
-        help="Show colored grains instead of grayscale. (default: false)",
+        help="Instead of using grayscale, display colored grains. (default: false)",
         action="store_true",
     )
     parser.add_argument(
@@ -84,8 +118,8 @@ def parser():
         default=0,
         type=int,
         help=(
-            "Save snapshots of microstructure every _ seconds."
-            " Will save only one snapshot without simulation. (default: never)"
+            "Every specified number of seconds, save images of the microstructure."
+            " Only one image is saved without simulation. (default: never)"
         ),
     )
     parser.add_argument(
@@ -100,7 +134,4 @@ def parser():
         help="Load microstructure data from a file.",
     )
 
-    # Return args namespace
     return parser.parse_args()
-
-
