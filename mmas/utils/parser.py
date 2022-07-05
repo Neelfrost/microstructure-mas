@@ -4,7 +4,6 @@
 # License: GPL-3
 
 import argparse
-from io import TextIOBase
 
 
 class CustomFormatter(argparse.HelpFormatter):
@@ -130,7 +129,7 @@ def parser():
     )
     parser.add_argument(
         "--load",
-        type=TextIOBase,
+        type=str,
         help="Load microstructure data from a file.",
     )
 

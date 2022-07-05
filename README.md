@@ -32,7 +32,7 @@ mmas.exe --help
 
 ```
 usage: mmas [-h] [-w int] [-c int] [-o int] [-m {pseudo,sobol,halton,latin}] [-T float] [-b float] [-g float]
-            [--simulate] [--color] [--snapshot int] [--save] [--load TextIOBase]
+            [--simulate] [--color] [--snapshot int] [--save] [--load str]
 
 Microstructure Modeling and Simulation. Generate microstructures using site-saturation condition, and simulate grain
 growth using Monte Carlo Potts Model.
