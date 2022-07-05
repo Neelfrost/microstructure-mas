@@ -6,8 +6,8 @@
 import os
 import sys
 
-from alive_progress import alive_bar
 from pkg_resources import resource_filename
+from tqdm import tqdm
 
 from mmas.core.matrix import Matrix2D
 from mmas.utils.parser import parser
@@ -152,9 +152,10 @@ def main():
             grid.simulator.mcs,
         )
 
-    with alive_bar(
-        title="Running...", bar=None, monitor=None, stats=None, spinner=None
-    ):
+    with tqdm(
+        bar_format="{desc} {elapsed}",
+        desc="\N{ESC}[38;5;93;1mRunning...\N{ESC}[0m",
+    ) as pbar:
         while True:
             # Simulate grain growth
             grid.simulate(simulate=args.simulate)
@@ -188,5 +189,6 @@ def main():
 
             pg.display.update()
             clock.tick(FRAMERATE)
+            pbar.update()
 
 

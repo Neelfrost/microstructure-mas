@@ -9,8 +9,8 @@ from math import ceil, log2
 from uuid import uuid4
 
 import numpy as np
-from alive_progress import alive_it
 from scipy.stats import qmc
+from tqdm import trange
 
 from mmas.core.simulation import Simulate
 
@@ -136,13 +136,11 @@ class Matrix2D:
     def create_grains(self):
         """Create voronoi regions (grains) using the seed locations. Each region belongs to a specific crystallographic
         orientation."""
-        for i in alive_it(
-            range(self.cols),
-            title="Generating microstructure...",
-            bar="blocks",
-            spinner=None,
-            stats=False,
-            monitor=False,
+        for i in trange(
+            self.cols,
+            ascii=" ∙□■",
+            bar_format="{desc} |{bar:50}| {elapsed}",
+            desc="\N{ESC}[38;5;93;1mGenerating microstructure...\N{ESC}[0m",
         ):
             for j in range(self.rows):
                 if self.grid[i][j] != 0:
