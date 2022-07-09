@@ -9,10 +9,9 @@ from math import ceil, log2
 from uuid import uuid4
 
 import numpy as np
+from mmas.core.simulation import Simulate
 from scipy.stats import qmc
 from tqdm import trange
-
-from mmas.core.simulation import Simulate
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
@@ -140,7 +139,7 @@ class Matrix2D:
             self.cols,
             ascii=" ∙□■",
             bar_format="{desc} |{bar:50}| {elapsed}",
-            desc="\N{ESC}[38;5;93;1mGenerating microstructure...\N{ESC}[0m",
+            desc="\N{ESC}[38;5;93;1m" + "Generating microstructure..." + "\N{ESC}[0m",
         ):
             for j in range(self.rows):
                 if self.grid[i][j] != 0:
@@ -250,13 +249,21 @@ class Matrix2D:
         with open(file_name, "w+") as file:
             json.dump(output, file, separators=(",", ":"))
 
-        print(f"Microstructure data saved as: {file_name}")
+        print(
+            "\N{ESC}[38;5;93;1m"
+            + "Microstructure data saved as: "
+            + "\N{ESC}[0m"
+            + f"{os.path.relpath(file_name)}"
+        )
 
     @staticmethod
     def load(file_name):
         """Load the attributes of the matrix/microstructure from a json file in the current working directory."""
         with open(file_name, "r") as file:
-            print(f"Microstructure data loaded from: {file_name}.")
+            print(
+                "\N{ESC}[38;5;93;1m"
+                + "Microstructure data loaded from: "
+                + "\N{ESC}[0m"
+                + f"{os.path.relpath(file_name)}"
+            )
             return json.load(file)
-
-

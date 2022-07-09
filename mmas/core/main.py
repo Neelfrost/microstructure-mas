@@ -160,7 +160,7 @@ def main():
 
     with tqdm(
         bar_format="{desc} {elapsed}",
-        desc="\N{ESC}[38;5;93;1mRunning...\N{ESC}[0m",
+        desc="\N{ESC}[38;5;93;1m" + "Running..." + "\N{ESC}[0m",
     ) as pbar:
         while True:
             # Simulate grain growth
