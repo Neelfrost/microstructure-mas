@@ -30,7 +30,7 @@ class CustomFormatter(argparse.HelpFormatter):
             return action.dest
 
 
-def parser():
+def argparser():
     METHODS = ("pseudo", "sobol", "halton", "latin")
 
     parser = argparse.ArgumentParser(
@@ -59,7 +59,7 @@ def parser():
     parser.add_argument(
         "-c",
         "--cell-size",
-        dest="cell_size",
+        dest="grid_cell_size",
         default=5,
         type=int,
         help="Grid cell size, lower = sharper boundaries. (default: 5, recommended: 1-10)",
@@ -74,10 +74,11 @@ def parser():
     parser.add_argument(
         "-m",
         "--method",
-        default="sobol",
+        default="halton",
         choices=METHODS,
+        dest="seed_method",
         type=str,
-        help=f"Seed generation algorithm. Allowed values are: {', '.join(METHODS)}. (default: sobol)",
+        help=f"Seed generation algorithm. Allowed values are: {', '.join(METHODS)}. (default: halton)",
     )
     parser.add_argument(
         "-T",
@@ -89,6 +90,7 @@ def parser():
     parser.add_argument(
         "-b",
         "--boltz",
+        dest="boltz_const",
         default=1,
         type=float,
         help="Boltzmann constant. (default: 1)",
@@ -96,6 +98,7 @@ def parser():
     parser.add_argument(
         "-g",
         "--grain",
+        dest="grain_boundary_energy",
         default=1,
         type=float,
         help="Grain boundary energy. (default: 1)",
@@ -130,7 +133,13 @@ def parser():
     parser.add_argument(
         "--load",
         type=str,
-        help="Load microstructure data from a file.",
+        help=(
+            "Load microstructure data from a file."
+            " Note: Can be used with/overwritten (including default values) by the following options:"
+            " temperature, grain_boundary_energy, boltz_const, simulate, color, snapshot."
+        ),
     )
 
     return parser.parse_args()
+
+

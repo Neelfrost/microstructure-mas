@@ -6,11 +6,10 @@
 import os
 import sys
 
+from mmas.core.matrix import Matrix2D
+from mmas.utils.parser import argparser
 from pkg_resources import resource_filename
 from tqdm import tqdm
-
-from mmas.core.matrix import Matrix2D
-from mmas.utils.parser import parser
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"  # hide pygame startup banner
 
@@ -82,35 +81,42 @@ def save_snapshot(canvas, width, cell_size, method, orientations, time, mcs):
 
 def main():
     # Parse arguments
-    args = parser()
+    args = argparser()
+    args_dict = vars(args)
 
     # Framerate
     FRAMERATE = 60
 
     if args.load:
         data = Matrix2D.load(args.load)
+        # Override simulation parameters if provided
+        data.update(
+            {
+                "temperature": args.temperature,
+                "grain_boundary_energy": args.grain_boundary_energy,
+                "boltz_const": args.boltz_const,
+            }
+        )
         WIDTH = data.get("rows") * data.get("grid_cell_size")
-        GRID_CELL_SIZE = data.get("grid_cell_size")
+        GRID_CELL_SIZE = min(WIDTH, max(data.get("grid_cell_size"), 1))
     else:
         # Window size
         WIDTH = args.width
 
         # Size of a cell, lower = sharper edges
-        GRID_CELL_SIZE = min(WIDTH, max(args.cell_size, 1))
+        GRID_CELL_SIZE = min(WIDTH, max(args.grid_cell_size, 1))
 
         # Number of cols, rows
         SIZE = WIDTH // GRID_CELL_SIZE
 
-        data = {
-            "rows": SIZE,
-            "cols": SIZE,
-            "grid_cell_size": GRID_CELL_SIZE,
-            "orientations": args.orientations,
-            "seed_method": args.method,
-            "temperature": args.temperature,
-            "grain_boundary_energy": args.grain,
-            "boltz_const": args.boltz,
-        }
+        data = args_dict.copy()
+        data.update(
+            {
+                "rows": SIZE,
+                "cols": SIZE,
+                "grid_cell_size": GRID_CELL_SIZE,
+            }
+        )
 
     # Create microstructure
     grid = Matrix2D(data)
