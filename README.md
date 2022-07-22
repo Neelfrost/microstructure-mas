@@ -12,17 +12,25 @@ https://user-images.githubusercontent.com/64243795/172417152-be09b5d2-f71e-4dc0-
 
 ## Installation
 
-Clone repo:
+1. Download repository:
 
-```
-git clone https://github.com/Neelfrost/microstructure-mas; cd .\microstructure-mas
-```
+   Without Git:
 
-Install using pip:
+   ```
+   curl.exe -LJO https://github.com/Neelfrost/microstructure-mas/archive/refs/heads/main.zip; Expand-Archive -Force .\microstructure-mas-main.zip .; cd .\microstructure-mas-main
+   ```
 
-```
-pip install .
-```
+   With Git:
+
+   ```
+   git clone https://github.com/Neelfrost/microstructure-mas; cd .\microstructure-mas
+   ```
+
+2. Install using pip:
+
+   ```
+   pip install .
+   ```
 
 ## Usage
 
