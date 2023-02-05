@@ -5,7 +5,7 @@
 <h1 align="center">Microstructure Modeling and Simulation</h1>
 
 <p align="center">
-  Generate microstructures using site-saturation condition, and simulate grain growth using Monte Carlo Potts Model.
+  This repository contains a program to generate microstructures using a site-saturation condition and simulate grain growth using the Monte Carlo Potts Model. The generated microstructures can be used as initial conditions for the grain growth simulation, which can be used to study the evolution of grain boundaries over time.
 </p>
 
 https://user-images.githubusercontent.com/64243795/172417152-be09b5d2-f71e-4dc0-8d4f-c78993d95f70.mp4
@@ -60,7 +60,10 @@ options:
                       without simulation. (default: never)
   --save              Save microstructure data to a file. (default: false)
   --load              Load microstructure data from a file.
+
 ```
+
+The program parameters, such as the number of grains, and the temperature of the Potts Model, can be adjusted as per above.
 
 ## Resulting Microstructures
 
@@ -71,6 +74,10 @@ options:
 |                                                                                   Halton                                                                                   |                                                                                  Latin Hypercube                                                                                   |
 | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_mhalton_o500_mcs0_t0.png" alt="halton" width="400" height="400"> | <img src="https://raw.githubusercontent.com/Neelfrost/github-assets/main/microstructure-mas/micro_w600_c2_mlatin_o500_mcs0_t0.png" alt="latin-hypercube" width="400" height="400"> |
+
+## Limitations
+
+The program is intended to provide a qualitative understanding of the grain growth process, and is not intended to be used for quantitative predictions or engineering applications.
 
 ## References
 
