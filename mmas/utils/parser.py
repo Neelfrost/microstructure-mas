@@ -54,7 +54,7 @@ def argparser():
         "--width",
         default=500,
         type=int,
-        help="Application window size. (default: 500)",
+        help="Set the application window width. (default: 500)",
     )
     parser.add_argument(
         "-c",
@@ -62,14 +62,14 @@ def argparser():
         dest="grid_cell_size",
         default=5,
         type=int,
-        help="Grid cell size, lower = sharper boundaries. (default: 5, recommended: 1-10)",
+        help="Define the grid cell size. Lower values result in sharper boundaries. (default: 5, recommended range: 1-10)",
     )
     parser.add_argument(
         "-o",
         "--orientations",
         default=100,
         type=int,
-        help="Inital grain size, higher = smaller grains. (default: 100)",
+        help="Specify the initial number of grains. Higher values produce smaller grains. (default: 100)",
     )
     parser.add_argument(
         "-m",
@@ -78,14 +78,14 @@ def argparser():
         choices=METHODS,
         dest="seed_method",
         type=str,
-        help=f"Seed generation algorithm. Allowed values are: {', '.join(METHODS)}. (default: halton)",
+        help=f"Choose the seed generation algorithm. Allowed values are: {', '.join(METHODS)}. (default: halton)",
     )
     parser.add_argument(
         "-T",
         "--temperature",
         default=0,
         type=float,
-        help="Simulation temperature. (default: 0, recommended: 0-2)",
+        help="Set the simulation temperature. Higher values increase the likelihood of unfavorable grain boundary migration. (default: 0, recommended range: 0-2)",
     )
     parser.add_argument(
         "-b",
@@ -93,7 +93,7 @@ def argparser():
         dest="boltz_const",
         default=1,
         type=float,
-        help="Boltzmann constant. (default: 1)",
+        help="Specify the Boltzmann constant. (default: 1)",
     )
     parser.add_argument(
         "-g",
@@ -101,18 +101,18 @@ def argparser():
         dest="grain_boundary_energy",
         default=1,
         type=float,
-        help="Grain boundary energy. (default: 1)",
+        help="Set the grain boundary energy. (default: 1)",
     )
     parser.add_argument(
         "--simulate",
         default=False,
-        help="Simulate grain growth. (default: false)",
+        help="Enable grain growth simulation. (default: false)",
         action="store_true",
     )
     parser.add_argument(
         "--color",
         default=False,
-        help="Instead of using grayscale, display colored grains. (default: false)",
+        help="Display grains in color instead of grayscale. (default: false)",
         action="store_true",
     )
     parser.add_argument(
@@ -120,8 +120,7 @@ def argparser():
         default=0,
         type=int,
         help=(
-            "Every specified number of seconds, save images of the microstructure."
-            " Only one image is saved without simulation. (default: never)"
+            "Save snapshots of the microstructure at specified intervals (in seconds). Without simulation, only one snapshot is saved. (default: never)"
         ),
     )
     parser.add_argument(
@@ -134,12 +133,17 @@ def argparser():
         "--load",
         type=str,
         help=(
-            "Load microstructure data from a file."
-            " Note: Can be used with/overwritten (including default values) by the following options:"
-            " temperature, grain_boundary_energy, boltz_const, simulate, color, snapshot."
+            "Load microstructure data from a file. This option can override or be combined with other options like --temperature, --grain, --boltz, --simulate, --color, and --snapshot."
+        ),
+    )
+    parser.add_argument(
+        "-hb",
+        "--highlight-boundaries",
+        type=str,
+        help=(
+            "Process snapshots of a microstructure from a specified folder to extract and display only grain boundaries. The processed snapshots are saved with highlighted grain boundaries, removing the original colored grain representation."
+            "Note: This requires imagemagick (https://imagemagick.org) to be installed."
         ),
     )
 
     return parser.parse_args()
-
-

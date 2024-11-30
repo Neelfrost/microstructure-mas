@@ -8,6 +8,7 @@ import sys
 
 from mmas.core.matrix import Matrix2D
 from mmas.utils.parser import argparser
+from mmas.utils.edge_detection import process_microstructures
 from pkg_resources import resource_filename
 from tqdm import tqdm
 
@@ -83,6 +84,11 @@ def main():
     # Parse arguments
     args = argparser()
     args_dict = vars(args)
+
+    # Process microstructure snapshots to show only grain boundaries.
+    if args.highlight_boundaries:
+        process_microstructures(args.highlight_boundaries)
+        return
 
     # Framerate
     FRAMERATE = 60
@@ -196,5 +202,3 @@ def main():
             pg.display.update()
             clock.tick(FRAMERATE)
             pbar.update()
-
-

@@ -46,20 +46,24 @@ Microstructure Modeling and Simulation. Generate microstructures using site-satu
 growth using Monte Carlo Potts Model.
 
 options:
-  -h, --help          Show this message and exit.
-  -w, --width         Application window size. (default: 500)
-  -c, --cell-size     Grid cell size, lower = sharper boundaries. (default: 5, recommended: 1-10)
-  -o, --orientations  Inital grain size, higher = smaller grains. (default: 100)
-  -m, --method        Seed generation algorithm. Allowed values are: pseudo, sobol, halton, latin. (default: sobol)
-  -T, --temperature   Simulation temperature. (default: 0, recommended: 0-2)
-  -b, --boltz         Boltzmann constant. (default: 1)
-  -g, --grain         Grain boundary energy. (default: 1)
-  --simulate          Simulate grain growth. (default: false)
-  --color             Instead of using grayscale, display colored grains. (default: false)
-  --snapshot          Every specified number of seconds, save images of the microstructure. Only one image is saved
-                      without simulation. (default: never)
-  --save              Save microstructure data to a file. (default: false)
-  --load              Load microstructure data from a file.
+-h, --help            Show this message and exit.
+-w, --width           Set the application window width. (default: 500)
+-c, --cell-size       Define the grid cell size. Lower values result in sharper boundaries. (default: 5, recommended range: 1-10)
+-o, --orientations    Specify the initial number of grains. Higher values produce smaller grains. (default: 100)
+-m, --method          Choose the seed generation algorithm. Allowed values are: pseudo, sobol, halton, latin. (default: halton)
+-T, --temperature     Set the simulation temperature. Higher values increase the likelihood of unfavorable grain boundary migration. (default: 0, recommended range: 0-2)
+-b, --boltz           Specify the Boltzmann constant. (default: 1)
+-g, --grain           Set the grain boundary energy. (default: 1)
+--simulate            Enable grain growth simulation. (default: false)
+--color               Display grains in color instead of grayscale. (default: false)
+--snapshot            Save snapshots of the microstructure at specified intervals (in seconds). Without simulation, only one snapshot is saved. (default: never)
+--save                Save microstructure data to a file. (default: false)
+--load                Load microstructure data from a file. This option can override or be combined with other options like --temperature, --grain, --boltz, --simulate,
+                      --color, and --snapshot.
+-hb, --highlight-boundaries
+                      Process snapshots of a microstructure from a specified folder to extract and display only grain boundaries. The processed snapshots are saved with
+                      highlighted grain boundaries, removing the original colored grain representation.Note: This requires imagemagick (https://imagemagick.org) to be
+                      installed.
 
 ```
 
